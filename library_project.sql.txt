@@ -1,0 +1,71 @@
+-- Query 1: Copies of "The Lost Tribe" in Sharpstown
+SELECT bc.book_copies_No_Of_Copies
+FROM tbl_book b
+JOIN tbl_book_copies bc
+    ON b.book_BookID = bc.book_copies_BookID
+JOIN tbl_library_branch lb
+    ON bc.book_copies_BranchID = lb.library_branch_BranchID
+WHERE b.book_Title = 'The Lost Tribe'
+AND lb.library_branch_BranchName = 'Sharpstown';
+
+-- Query 2: Copies of "The Lost Tribe" in each branch
+SELECT lb.library_branch_BranchName,
+       bc.book_copies_No_Of_Copies
+FROM tbl_book b
+JOIN tbl_book_copies bc
+    ON b.book_BookID = bc.book_copies_BookID
+JOIN tbl_library_branch lb
+    ON bc.book_copies_BranchID = lb.library_branch_BranchID
+WHERE b.book_Title = 'The Lost Tribe';
+
+-- Query 3: Borrowers with no books checked out
+SELECT br.borrower_BorrowerName
+FROM tbl_borrower br
+LEFT JOIN tbl_book_loans bl
+    ON br.borrower_CardNo = bl.book_loans_CardNo
+WHERE bl.book_loans_LoansID IS NULL;
+
+-- Query 4: Sharpstown loans due on specific date
+SELECT b.book_Title,
+       br.borrower_BorrowerName,
+       br.borrower_BorrowerAddress
+FROM tbl_book_loans bl
+JOIN tbl_book b
+    ON bl.book_loans_BookID = b.book_BookID
+JOIN tbl_borrower br
+    ON bl.book_loans_CardNo = br.borrower_CardNo
+JOIN tbl_library_branch lb
+    ON bl.book_loans_BranchID = lb.library_branch_BranchID
+WHERE lb.library_branch_BranchName = 'Sharpstown'
+AND bl.book_loans_DueDate = '0002-03-18';
+
+-- Query 5: Total books loaned from each branch
+SELECT lb.library_branch_BranchName,
+       COUNT(bl.book_loans_LoansID) AS Total_Books_Loaned
+FROM tbl_library_branch lb
+LEFT JOIN tbl_book_loans bl
+    ON lb.library_branch_BranchID = bl.book_loans_BranchID
+GROUP BY lb.library_branch_BranchName;
+
+-- Query 6: Borrowers with more than five books
+SELECT br.borrower_BorrowerName,
+       br.borrower_BorrowerAddress,
+       COUNT(bl.book_loans_LoansID) AS Books_Checked_Out
+FROM tbl_borrower br
+JOIN tbl_book_loans bl
+    ON br.borrower_CardNo = bl.book_loans_CardNo
+GROUP BY br.borrower_BorrowerName, br.borrower_BorrowerAddress
+HAVING COUNT(bl.book_loans_LoansID) > 5;
+
+-- Query 7: Stephen King books in Central branch
+SELECT b.book_Title,
+       bc.book_copies_No_Of_Copies AS Total_Copies
+FROM tbl_book b
+JOIN tbl_book_authors ba
+    ON b.book_BookID = ba.book_authors_BookID
+JOIN tbl_book_copies bc
+    ON b.book_BookID = bc.book_copies_BookID
+JOIN tbl_library_branch lb
+    ON bc.book_copies_BranchID = lb.library_branch_BranchID
+WHERE ba.book_authors_AuthorName = 'Stephen King'
+AND lb.library_branch_BranchName = 'Central';
